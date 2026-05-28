@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Automation Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #181818;
+    --surface2: #222222;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f0;
+    --text2: #888;
+    --text3: #555;
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.12);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251,191,36,0.12);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.1);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.1);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+  
+  .page { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+  
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; gap: 16px; flex-wrap: wrap; }
+  .header-left h1 { font-size: 22px; font-weight: 500; letter-spacing: -0.3px; color: var(--text); }
+  .header-left p { color: var(--text2); font-size: 13px; margin-top: 4px; font-family: var(--mono); }
+  .last-updated { font-size: 11px; font-family: var(--mono); color: var(--text3); background: var(--surface); border: 0.5px solid var(--border); padding: 6px 12px; border-radius: var(--radius); }
+
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
+  .card .clabel { font-size: 11px; font-family: var(--mono); color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .card .cval { font-size: 28px; font-weight: 500; font-family: var(--mono); }
+  .card .csub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .card.green .cval { color: var(--green); }
+  .card.amber .cval { color: var(--amber); }
+  .card.gray .cval { color: var(--text2); }
+
+  .progress-banner { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 28px; }
+  .progress-banner .pb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .progress-banner .pb-label { font-size: 12px; color: var(--text2); font-family: var(--mono); }
+  .progress-banner .pb-pct { font-size: 13px; font-family: var(--mono); font-weight: 500; color: var(--green); }
+  .prog-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .prog-fill { height: 6px; background: var(--green); border-radius: 3px; transition: width 1s ease; }
+  .prog-segments { display: flex; gap: 2px; height: 6px; border-radius: 3px; overflow: hidden; }
+  .prog-seg { height: 6px; transition: width 0.8s ease; }
+
+  .charts-row { display: grid; grid-template-columns: 280px 1fr; gap: 16px; margin-bottom: 28px; }
+  .chart-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+  .chart-card h3 { font-size: 12px; font-family: var(--mono); color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+  .donut-wrap { position: relative; width: 180px; height: 180px; margin: 0 auto; }
+  .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+  .donut-center .dc-val { font-size: 22px; font-weight: 500; font-family: var(--mono); color: var(--green); }
+  .donut-center .dc-label { font-size: 10px; font-family: var(--mono); color: var(--text2); }
+  .bar-wrap { position: relative; width: 100%; height: 200px; }
+  .legend { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-family: var(--mono); color: var(--text2); }
+  .leg-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  .table-section { margin-bottom: 28px; }
+  .table-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .table-header h2 { font-size: 12px; font-family: var(--mono); color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+  .filter-row { display: flex; gap: 8px; }
+  .fbtn { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 5px 12px; font-size: 11px; font-family: var(--mono); color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .fbtn:hover, .fbtn.active { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+
+  .table-wrap { border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--surface); }
+  th { padding: 10px 16px; text-align: left; font-size: 10px; font-family: var(--mono); color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 400; border-bottom: 0.5px solid var(--border); white-space: nowrap; }
+  td { padding: 11px 16px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  tbody tr { cursor: pointer; }
+
+  .suite-name { font-weight: 400; font-size: 13px; }
+  .num { font-family: var(--mono); font-size: 13px; color: var(--text); }
+  .num-dim { font-family: var(--mono); font-size: 13px; color: var(--text2); }
+  
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-family: var(--mono); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .b-done { background: var(--green-dim); color: var(--green); border: 0.5px solid rgba(74,222,128,0.2); }
+  .b-prog { background: var(--amber-dim); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.2); }
+  .b-todo { background: var(--surface2); color: var(--text2); border: 0.5px solid var(--border); }
+  .b-block { background: var(--red-dim); color: var(--red); border: 0.5px solid rgba(248,113,113,0.2); }
+
+  .bar-inline { display: flex; align-items: center; gap: 10px; }
+  .bar-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; min-width: 60px; }
+  .bar-inner { height: 5px; border-radius: 3px; }
+  .bar-pct { font-family: var(--mono); font-size: 11px; color: var(--text2); min-width: 32px; text-align: right; }
+
+  .status-sel { background: transparent; border: none; font-size: 10px; font-family: var(--mono); color: var(--text2); cursor: pointer; padding: 0; outline: none; }
+  .status-sel:hover { color: var(--text); }
+
+  .detail-panel { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); margin-top: 16px; overflow: hidden; display: none; }
+  .detail-panel.open { display: block; }
+  .detail-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 0.5px solid var(--border); }
+  .detail-header span { font-size: 12px; font-family: var(--mono); color: var(--text2); }
+  .close-btn { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 16px; padding: 0 4px; }
+  .close-btn:hover { color: var(--text); }
+
+  .qase-block { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-top: 28px; }
+  .qase-block h2 { font-size: 12px; font-family: var(--mono); color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .code-block { background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 14px 16px; font-family: var(--mono); font-size: 12px; color: #ccc; line-height: 1.7; overflow-x: auto; white-space: pre; }
+  .c-key { color: #60a5fa; }
+  .c-num { color: #4ade80; }
+  .c-comment { color: #555; }
+
+  @media (max-width: 700px) {
+    .cards { grid-template-columns: repeat(2,1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>QA Automation Roadmap</h1>
+      <p>C3 Web App — Test automation tracking</p>
+    </div>
+    <div class="last-updated" id="lastUpdated">updated: —</div>
+  </div>
+
+  <div class="cards" id="topCards"></div>
+
+  <div class="progress-banner">
+    <div class="pb-top">
+      <span class="pb-label">overall automation progress</span>
+      <span class="pb-pct" id="overallPct">0%</span>
+    </div>
+    <div class="prog-segments" id="progSegments"></div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>Breakdown</h3>
+      <div class="donut-wrap">
+        <canvas id="donutChart" role="img" aria-label="Automation breakdown donut chart"></canvas>
+        <div class="donut-center">
+          <div class="dc-val" id="donutCenter">0%</div>
+          <div class="dc-label">automated</div>
+        </div>
+      </div>
+      <div class="legend" style="margin-top:14px;justify-content:center">
+        <div class="leg-item"><span class="leg-dot" style="background:#4ade80"></span>automated</div>
+        <div class="leg-item"><span class="leg-dot" style="background:#fbbf24"></span>to-do</div>
+        <div class="leg-item"><span class="leg-dot" style="background:#333"></span>manual</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Progress by suite</h3>
+      <div class="bar-wrap"><canvas id="barChart" role="img" aria-label="Progress by suite bar chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <div class="table-header">
+      <h2>Suites</h2>
+      <div class="filter-row">
+        <button class="fbtn active" onclick="setFilter('all',this)">All</button>
+        <button class="fbtn" onclick="setFilter('in-progress',this)">In progress</button>
+        <button class="fbtn" onclick="setFilter('not-started',this)">Todo</button>
+        <button class="fbtn" onclick="setFilter('done',this)">Done</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Suite</th>
+            <th>Total</th>
+            <th>Automated</th>
+            <th>To-do</th>
+            <th>Manual</th>
+            <th>Progress</th>
+            <th>Dev status</th>
+          </tr>
+        </thead>
+        <tbody id="mainTable"></tbody>
+      </table>
+    </div>
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <span id="detailTitle">—</span>
+        <button class="close-btn" onclick="closeDetail()">✕</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>#</th><th>Test title</th><th>Priority</th><th>Automation</th><th>Status</th></tr>
+        </thead>
+        <tbody id="detailTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="qase-block">
+    <h2>How to update — paste your QASE_IDS</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;font-family:var(--mono)">Copy your QASE_IDS object from your test code and paste it below. The dashboard updates automatically.</p>
+    <textarea id="qaseInput" rows="10" style="width:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:12px 14px;font-family:var(--mono);font-size:12px;color:#ccc;resize:vertical;outline:none;line-height:1.7" placeholder="Paste your QASE_IDS = { ... } here"></textarea>
+    <button onclick="applyQaseIds()" style="margin-top:10px;background:var(--green-dim);border:0.5px solid rgba(74,222,128,0.3);color:var(--green);font-family:var(--mono);font-size:12px;padding:8px 18px;border-radius:var(--radius);cursor:pointer;">Apply & update dashboard</button>
+    <div id="applyMsg" style="display:none;font-family:var(--mono);font-size:12px;color:var(--green);margin-top:8px;"></div>
+  </div>
+
+</div>
+
+<script>
+const GROUP_TO_SUITE = {
+  dashboard:"Dashboard", web:"Web Admin", webAdmin:"Web Admin",
+  instruments:"Instruments", gateway:"Gateway", packingSets:"Packing sets",
+  maintenance:"Maintenance", configuration:"Configuration", searchByImage:"Search by image",
+  instrumentUnits:"Instrument units", packedItems:"Packed items",
+  surgeryManagement:"Surgery management", cleaningSterilization:"Cleaning & Sterilization",
+  alertManagement:"Alert Management", locationManagement:"Location Management",
+  owners:"Owners", importExport:"Import/Export", userManagement:"User management",
+};
+
+let suiteData = [
+  {suite:"Web Admin",total:5,automated:2,toBe:1,notAuto:2,devStatus:"in-progress"},
+  {suite:"Dashboard",total:2,automated:2,toBe:0,notAuto:0,devStatus:"done"},
+  {suite:"Instruments",total:10,automated:2,toBe:3,notAuto:5,devStatus:"in-progress"},
+  {suite:"Instrument units",total:4,automated:0,toBe:1,notAuto:3,devStatus:"not-started"},
+  {suite:"Search by image",total:5,automated:5,toBe:0,notAuto:0,devStatus:"done"},
+  {suite:"Packing sets",total:5,automated:2,toBe:2,notAuto:1,devStatus:"in-progress"},
+  {suite:"Packed items",total:4,automated:0,toBe:4,notAuto:0,devStatus:"not-started"},
+  {suite:"Surgery management",total:5,automated:0,toBe:1,notAuto:4,devStatus:"not-started"},
+  {suite:"Cleaning & Sterilization",total:2,automated:0,toBe:1,notAuto:1,devStatus:"not-started"},
+  {suite:"Gateway",total:2,automated:1,toBe:0,notAuto:1,devStatus:"in-progress"},
+  {suite:"Maintenance",total:8,automated:8,toBe:0,notAuto:0,devStatus:"done"},
+  {suite:"Alert Management",total:2,automated:0,toBe:0,notAuto:2,devStatus:"not-started"},
+  {suite:"Configuration",total:8,automated:2,toBe:3,notAuto:3,devStatus:"in-progress"},
+  {suite:"Location Management",total:5,automated:0,toBe:4,notAuto:1,devStatus:"not-started"},
+  {suite:"Owners",total:2,automated:0,toBe:2,notAuto:0,devStatus:"not-started"},
+  {suite:"Import/Export",total:16,automated:0,toBe:13,notAuto:3,devStatus:"not-started"},
+  {suite:"User management",total:8,automated:0,toBe:8,notAuto:0,devStatus:"not-started"},
+];
+
+const testDetails = [
+  {id:1,title:"Profile settings",suite:"Web Admin",priority:"medium",auto:"automated"},
+  {id:3,title:"Language of the web app",suite:"Web Admin",priority:"medium",auto:"to-be-automated"},
+  {id:9,title:"Help",suite:"Web Admin",priority:"low",auto:"is-not-automated"},
+  {id:10,title:"Feedback",suite:"Web Admin",priority:"low",auto:"is-not-automated"},
+  {id:37,title:"Global search",suite:"Web Admin",priority:"medium",auto:"automated"},
+  {id:11,title:"Activity",suite:"Dashboard",priority:"low",auto:"automated"},
+  {id:12,title:"Config",suite:"Dashboard",priority:"low",auto:"automated"},
+  {id:13,title:"Instruments & Sets page",suite:"Instruments",priority:"medium",auto:"to-be-automated"},
+  {id:5,title:"Add instrument",suite:"Instruments",priority:"high",auto:"automated"},
+  {id:34,title:"Edit instrument details",suite:"Instruments",priority:"high",auto:"automated"},
+  {id:8,title:"Gateway page",suite:"Gateway",priority:"medium",auto:"automated"},
+  {id:15,title:"Add new packing set",suite:"Packing sets",priority:"high",auto:"automated"},
+  {id:35,title:"Edit packing set",suite:"Packing sets",priority:"high",auto:"automated"},
+  {id:17,title:"Service requests",suite:"Maintenance",priority:"high",auto:"automated"},
+  {id:18,title:"Rules config page",suite:"Maintenance",priority:"high",auto:"automated"},
+  {id:39,title:"Service request details",suite:"Maintenance",priority:"high",auto:"automated"},
+  {id:41,title:"Add new rule set",suite:"Maintenance",priority:"high",auto:"automated"},
+  {id:42,title:"Edit rule set",suite:"Maintenance",priority:"high",auto:"automated"},
+  {id:43,title:"Rules details",suite:"Maintenance",priority:"high",auto:"automated"},
+  {id:223,title:"Service request - send to service",suite:"Maintenance",priority:"high",auto:"automated"},
+  {id:224,title:"Service request - fail to scan",suite:"Maintenance",priority:"high",auto:"automated"},
+  {id:20,title:"Import files",suite:"Configuration",priority:"medium",auto:"automated"},
+  {id:22,title:"Export files",suite:"Configuration",priority:"medium",auto:"automated"},
+  {id:60,title:"Image search history display",suite:"Search by image",priority:"medium",auto:"automated"},
+  {id:61,title:"Search by image upload",suite:"Search by image",priority:"medium",auto:"automated"},
+  {id:63,title:"Edit item in search by image",suite:"Search by image",priority:"medium",auto:"automated"},
+  {id:64,title:"Add item manually",suite:"Search by image",priority:"medium",auto:"automated"},
+  {id:65,title:"Search by image URL",suite:"Search by image",priority:"medium",auto:"automated"},
+];
+
+let currentFilter = 'all';
+let donutInst, barInst;
+
+function pct(s){ return s.total > 0 ? Math.round(s.automated/s.total*100) : 0; }
+
+function renderTopCards(){
+  const tot = suiteData.reduce((a,s)=>a+s.total,0);
+  const auto = suiteData.reduce((a,s)=>a+s.automated,0);
+  const toBe = suiteData.reduce((a,s)=>a+s.toBe,0);
+  const na = suiteData.reduce((a,s)=>a+s.notAuto,0);
+  const p = tot > 0 ? Math.round(auto/tot*100) : 0;
+  document.getElementById('topCards').innerHTML = `
+    <div class="card"><div class="clabel">Total tests</div><div class="cval">${tot}</div><div class="csub">${suiteData.length} suites</div></div>
+    <div class="card green"><div class="clabel">Automated</div><div class="cval">${auto}</div><div class="csub">${p}% complete</div></div>
+    <div class="card amber"><div class="clabel">To automate</div><div class="cval">${toBe}</div><div class="csub">in scope</div></div>
+    <div class="card gray"><div class="clabel">Manual only</div><div class="cval">${na}</div><div class="csub">not in scope</div></div>
+  `;
+  document.getElementById('overallPct').textContent = p+'%';
+  document.getElementById('donutCenter').textContent = p+'%';
+  const segs = document.getElementById('progSegments');
+  segs.innerHTML = suiteData.map(s=>{
+    const wp = s.total/tot*100;
+    const sp = pct(s);
+    const col = sp===100?'#4ade80':sp>0?'#fbbf24':'#222';
+    return `<div class="prog-seg" style="width:${wp}%;background:${col}" title="${s.suite}: ${sp}%"></div>`;
+  }).join('');
+}
+
+const STATUS_LABEL = {"not-started":"not started","in-progress":"in progress","done":"done","blocked":"blocked"};
+const STATUS_CLASS = {"not-started":"b-todo","in-progress":"b-prog","done":"b-done","blocked":"b-block"};
+const PRIO_COLOR = {high:"#f87171",medium:"#fbbf24",low:"#888",undefined:"#555"};
+
+function renderTable(){
+  const rows = suiteData.filter(s => currentFilter==='all' || s.devStatus===currentFilter);
+  document.getElementById('mainTable').innerHTML = rows.map(s=>{
+    const p = pct(s);
+    const barCol = p===100?'#4ade80':p>0?'#fbbf24':'#333';
+    return `<tr onclick="showDetail('${s.suite}')">
+      <td class="suite-name">${s.suite}</td>
+      <td class="num">${s.total}</td>
+      <td class="num" style="color:#4ade80">${s.automated}</td>
+      <td class="num-dim">${s.toBe}</td>
+      <td class="num-dim">${s.notAuto}</td>
+      <td>
+        <div class="bar-inline">
+          <div class="bar-track"><div class="bar-inner" style="width:${p}%;background:${barCol}"></div></div>
+          <span class="bar-pct">${p}%</span>
+        </div>
+      </td>
+      <td onclick="event.stopPropagation()">
+        <select class="status-sel" onchange="updateStatus('${s.suite}',this.value)">
+          ${["not-started","in-progress","done","blocked"].map(o=>`<option value="${o}" ${s.devStatus===o?'selected':''}>${STATUS_LABEL[o]}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStatus(suiteName, val){
+  const s = suiteData.find(x=>x.suite===suiteName);
+  if(s){ s.devStatus=val; renderTable(); }
+}
+
+function setFilter(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function showDetail(suiteName){
+  const tests = testDetails.filter(t=>t.suite===suiteName);
+  if(!tests.length) return;
+  document.getElementById('detailTitle').textContent = suiteName + ' — test details';
+  document.getElementById('detailTable').innerHTML = tests.map(t=>{
+    const autoBadge = t.auto==='automated'?'b-done':t.auto==='to-be-automated'?'b-prog':'b-todo';
+    const autoLabel = t.auto==='automated'?'automated':t.auto==='to-be-automated'?'to-do':'manual';
+    return `<tr>
+      <td class="num-dim">${t.id}</td>
+      <td style="font-size:13px">${t.title}</td>
+      <td><span style="font-size:11px;font-family:var(--mono);color:${PRIO_COLOR[t.priority]}">${t.priority||'—'}</span></td>
+      <td><span class="badge ${autoBadge}">${autoLabel}</span></td>
+      <td><span class="badge ${t.auto==='automated'?'b-done':'b-todo'}">${t.auto==='automated'?'✓ done':'pending'}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closeDetail(){ document.getElementById('detailPanel').classList.remove('open'); }
+
+function applyQaseIds(){
+  const raw = document.getElementById('qaseInput').value.trim();
+  if(!raw){ alert('Paste your QASE_IDS first.'); return; }
+  try {
+    let code = raw.replace(/const\s+QASE_IDS\s*=\s*/,'').replace(/;?\s*$/,'').trim();
+    const obj = Function('"use strict"; return (' + code + ')')();
+    const autoPerSuite = {};
+    for(const [group, ids] of Object.entries(obj)){
+      const suite = GROUP_TO_SUITE[group];
+      if(!suite) continue;
+      const count = typeof ids === 'object' && !Array.isArray(ids) ? Object.keys(ids).length : (Array.isArray(ids)?ids.length:0);
+      autoPerSuite[suite] = (autoPerSuite[suite]||0) + count;
+    }
+    suiteData = suiteData.map(s=>{
+      const auto = autoPerSuite[s.suite]||s.automated;
+      const clampedAuto = Math.min(auto, s.total);
+      const toBe = Math.max(0, s.total - clampedAuto - s.notAuto);
+      const ds = clampedAuto >= s.total - s.notAuto && s.total > s.notAuto ? 'done' : clampedAuto > 0 ? 'in-progress' : 'not-started';
+      return {...s, automated: clampedAuto, toBe, devStatus: ds};
+    });
+    renderTopCards(); renderTable(); updateCharts();
+    document.getElementById('lastUpdated').textContent = 'updated: ' + new Date().toLocaleString();
+    const msg = document.getElementById('applyMsg');
+    msg.textContent = '✓ Dashboard updated from QASE_IDS';
+    msg.style.display='block';
+    setTimeout(()=>msg.style.display='none', 4000);
+  } catch(e) { alert('Error parsing QASE_IDS: '+e.message); }
+}
+
+function initCharts(){
+  const auto = suiteData.reduce((a,s)=>a+s.automated,0);
+  const toBe = suiteData.reduce((a,s)=>a+s.toBe,0);
+  const na = suiteData.reduce((a,s)=>a+s.notAuto,0);
+  donutInst = new Chart(document.getElementById('donutChart'),{
+    type:'doughnut',
+    data:{labels:['Automated','To-do','Manual'],datasets:[{data:[auto,toBe,na],backgroundColor:['#4ade80','#fbbf24','#2a2a2a'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:true,cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed}`}}}}
+  });
+  barInst = new Chart(document.getElementById('barChart'),{
+    type:'bar',
+    data:{
+      labels: suiteData.map(s=>s.suite.length>14?s.suite.slice(0,13)+'…':s.suite),
+      datasets:[
+        {label:'Automated',data:suiteData.map(s=>s.automated),backgroundColor:'#4ade80',borderRadius:2},
+        {label:'To-do',data:suiteData.map(s=>s.toBe),backgroundColor:'#fbbf24',borderRadius:2},
+        {label:'Manual',data:suiteData.map(s=>s.notAuto),backgroundColor:'#2a2a2a',borderRadius:2},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{
+        x:{stacked:true,ticks:{color:'#555',font:{size:10,family:'IBM Plex Mono'},maxRotation:45,autoSkip:false},grid:{color:'transparent'},border:{color:'transparent'}},
+        y:{stacked:true,ticks:{color:'#555',font:{size:11,family:'IBM Plex Mono'}},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'transparent'}}
+      }
+    }
+  });
+}
+
+function updateCharts(){
+  const auto = suiteData.reduce((a,s)=>a+s.automated,0);
+  const toBe = suiteData.reduce((a,s)=>a+s.toBe,0);
+  const na = suiteData.reduce((a,s)=>a+s.notAuto,0);
+  donutInst.data.datasets[0].data = [auto,toBe,na];
+  donutInst.update();
+  barInst.data.datasets[0].data = suiteData.map(s=>s.automated);
+  barInst.data.datasets[1].data = suiteData.map(s=>s.toBe);
+  barInst.data.datasets[2].data = suiteData.map(s=>s.notAuto);
+  barInst.update();
+}
+
+document.getElementById('lastUpdated').textContent = 'updated: ' + new Date().toLocaleDateString();
+renderTopCards();
+renderTable();
+window.addEventListener('load', initCharts);
+</script>
+</body>
+</html>
